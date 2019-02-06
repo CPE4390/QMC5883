@@ -42,7 +42,8 @@ void main(void) {
     //Init compass registers
     I2CWriteRegister(0x0a, 0b10000000);  //Soft reset
     __delay_ms(1);
-    I2CWriteRegister(0x0a, 0b01000001);  //Pointer roll-over on, int pin off 
+    I2CWriteRegister(0x0a, 0b00000001);  //int pin off 
+    I2CWriteRegister(0x0b, 1);
     I2CWriteRegister(0x09, 0b00000001);  //512 OSR, 2G range, 10Hz, Continuous   
     while (1) {
         ReadCompass();
@@ -58,7 +59,9 @@ void main(void) {
 }
 
 void ReadCompass(void) {
-    //I2CWriteRegister(2, 0x01); //Mode = single measurement
+    do {
+        I2CReadData(0x06, 1); //Status
+    } while ((buffer[0] & 0x01) == 0);
     I2CReadData(0, 6);
     X = buffer[1];
     X = (X << 8) + buffer[0];
